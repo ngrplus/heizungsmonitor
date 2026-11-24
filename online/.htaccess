@@ -1,0 +1,17 @@
+# Online-Anzeige Heizung
+# Zugangsdaten, Messdaten und Hilfsdateien nie ausliefern
+<FilesMatch "^(config\.php|LIESMICH\.md|\.htpasswd)$">
+    Require all denied
+</FilesMatch>
+
+# Passwortschutz für die Anzeige (empfehlenswert, s. LIESMICH.md):
+# Die drei Zeilen mit "#" am Anfang einkommentieren und den Pfad zur Datei .htpasswd anpassen.
+#AuthType Basic
+#AuthName "Heizung"
+#AuthUserFile /PFAD/ZUM/ORDNER/heizung/.htpasswd
+#Require valid-user
+
+# Der Raspi (empfang.php) und der Wächter-Aufruf (waechter.php) haben eigene Schlüssel und brauchen kein Passwort
+<FilesMatch "^(empfang|waechter)\.php$">
+    Require all granted
+</FilesMatch>

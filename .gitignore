@@ -1,0 +1,15 @@
+# Zugangsdaten und Schlüssel – nur lokal (Vorlagen: *.beispiel.php)
+cloud_config.php
+monitor_config.php
+online_config.php
+online/config.php
+
+# Messdaten, Protokolle, Cache
+/data/
+/pi_daten/
+online/data/*
+!online/data/.htaccess
+*.bak
+
+# Fotos der Displays
+/pictures/

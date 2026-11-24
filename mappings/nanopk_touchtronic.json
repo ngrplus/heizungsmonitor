@@ -1,0 +1,29 @@
+{
+  "name": "Touchtronic Pellet (NanoPK/Classic) – Community-Belegung, UNVERIFIZIERT",
+  "note": "Quelle: Parameterliste aus Foren (mikrocontroller.net, knx-user-forum). Positionen hängen von der Firmware ab – bitte am Kesseldisplay gegenprüfen.",
+  "fields": {
+    "0":  {"key": "ZK",     "label": "Zustand Kessel (Code)",       "unit": ""},
+    "1":  {"key": "O2",     "label": "O2 im Rauchgas ist",          "unit": "%"},
+    "2":  {"key": "O2s",    "label": "O2 soll",                     "unit": "%"},
+    "3":  {"key": "TK",     "label": "Kesseltemperatur ist",        "unit": "°C"},
+    "4":  {"key": "TKs",    "label": "Kesseltemperatur soll",       "unit": "°C"},
+    "5":  {"key": "TRG",    "label": "Rauchgastemperatur",          "unit": "°C"},
+    "6":  {"key": "TAUS",   "label": "Außentemperatur",             "unit": "°C"},
+    "7":  {"key": "TAGem",  "label": "Außentemperatur gemittelt",   "unit": "°C"},
+    "8":  {"key": "TPO",    "label": "Puffer oben",                 "unit": "°C"},
+    "9":  {"key": "TPM",    "label": "Puffer mitte",                "unit": "°C"},
+    "10": {"key": "TPU",    "label": "Puffer unten",                "unit": "°C"},
+    "11": {"key": "PFD",    "label": "PFD (Pufferfüllgrad?)",       "unit": "%"},
+    "12": {"key": "TFW",    "label": "TFW (Fühler Fernleitung?)",   "unit": "°C"},
+    "13": {"key": "TRL",    "label": "Rücklauftemperatur",          "unit": "°C"},
+    "14": {"key": "TRLs",   "label": "Rücklauf soll",               "unit": "°C"},
+    "15": {"key": "RLP",    "label": "RLP (Rücklaufpumpe?)",        "unit": ""},
+    "16": {"key": "TVL_A",  "label": "Vorlauf Heizkreis A ist",     "unit": "°C"},
+    "17": {"key": "TVLs_A", "label": "Vorlauf Heizkreis A soll",    "unit": "°C"},
+    "18": {"key": "TRA",    "label": "Raumtemperatur A",            "unit": "°C"},
+    "19": {"key": "TBA",    "label": "Boiler (Warmwasser) A ist",   "unit": "°C"},
+    "20": {"key": "TBs_A",  "label": "Boiler A soll",               "unit": "°C"},
+    "21": {"key": "TVL_1",  "label": "Vorlauf Heizkreis 1 ist",     "unit": "°C"},
+    "22": {"key": "TVL_2",  "label": "Vorlauf Heizkreis 2 ist",     "unit": "°C"}
+  }
+}

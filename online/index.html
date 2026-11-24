@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Heizungsmonitor</title>
+<style>
+  :root {
+    --bg: #f4f2ee; --panel: #fff; --ink: #1d1f21; --muted: #6b6f74; --line: #e2ded6; --grid: #ece8e1;
+    --accent: #c4531c; --ok: #2f7d4f; --bad: #b3261e; --warn: #a66a00;
+    --c1: #c4531c; --c2: #d99a3a; --c3: #3f7fa6; --c4: #1d1f21; --burn: rgba(196, 83, 28, .10); --pellet: rgba(100, 96, 170, .13);
+    --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17181a; --panel: #212326; --ink: #e8e6e3; --muted: #9a9ea3; --line: #34373b; --grid: #2b2e31;
+            --accent: #e0703a; --ok: #5cbf85; --bad: #ef6b62; --warn: #e0a640;
+            --c1: #e0703a; --c2: #e3b25a; --c3: #6aa8cf; --c4: #e8e6e3; --burn: rgba(224, 112, 58, .16); --pellet: rgba(150, 144, 230, .17); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  header { padding: 18px 24px 8px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; } header h1 span { color: var(--accent); }
+  header a { color: var(--muted); font-size: 13px; }
+  header .ver { color: var(--muted); font: 12px var(--mono); }
+  main { padding: 8px 24px 32px; display: grid; gap: 16px; max-width: 1200px; }
+  @media (max-width: 700px) { main, header { padding-left: 12px; padding-right: 12px; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .banner { padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+  .banner.ok { background: color-mix(in srgb, var(--ok) 12%, transparent); color: var(--ok); }
+  [hidden] { display: none !important; }
+  .banner.pause { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .banner.pause button, .pausebar button { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .pausebar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .banner.bad { background: color-mix(in srgb, var(--bad) 12%, transparent); color: var(--bad); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .tile { container-type: inline-size; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+  .tile .l { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; }
+  .tile .v { font: 600 24px var(--mono); margin-top: 2px; }
+  .tile .v.lang { line-height: 29px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile .s { font-size: 12px; color: var(--muted); }
+  .tile.hot { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+  .tile.alarm { border-color: var(--bad); }
+  .tile.alarm .v { color: var(--bad); }
+  .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .row h2 { font-size: 15px; margin: 0; flex: 1; }
+  select { font: inherit; padding: 4px 6px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+  .chartwrap { position: relative; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; }
+  .chartwrap.drag { cursor: grabbing; }
+  .chartwrap svg { will-change: transform; }
+  .nav { display: flex; align-items: center; gap: 8px; margin: 6px 0 2px; font-size: 13px; color: var(--muted); flex-wrap: wrap; min-width: 0; }
+  .nav button { font: inherit; padding: 3px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  .nav button:disabled { opacity: .4; cursor: default; }
+  .nav input[type=range] { flex: 1 1 60px; min-width: 0; width: 60px; accent-color: var(--c4); }
+  .nav #navLabel { margin-left: auto; text-align: right; font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+  .legend i { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+  svg { display: block; width: 100%; }
+  svg text { font: 11px "Segoe UI", system-ui, sans-serif; fill: var(--muted); }
+  .ev { display: grid; grid-template-columns: 130px 1fr; gap: 2px 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .ev:last-child { border-bottom: 0; }
+  .ev .t { font: 12px var(--mono); color: var(--muted); padding-top: 2px; }
+  .ev b.alarm { color: var(--bad); } .ev b.info { color: var(--ok); }
+  .ev .x { grid-column: 2; color: var(--muted); font-size: 13px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  code { font: 12px var(--mono); }
+  .sub { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+  .sub ol { margin: 0; padding-left: 20px; flex: 1; min-width: 240px; font-size: 14px; }
+  .sub li { margin-bottom: 8px; }
+  .qr { background: #fff; padding: 8px; border-radius: 8px; line-height: 0; }
+  .qr:empty { display: none; }
+  .topic { display: flex; gap: 8px; align-items: center; margin: 6px 0; flex-wrap: wrap; }
+  .topic code { font: 600 15px var(--mono); padding: 4px 8px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 10%, transparent); word-break: break-all; }
+  .topic button { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Heizungs<span>monitor</span></h1>
+  <span class="ver" id="ver"></span>
+  <a href="index.html" id="lnkTelnet">→ Telnet-Test / Rohdaten</a>
+  <span class="ver" id="online"></span>
+</header>
+<main>
+  <div class="banner" id="banner">Lade …</div>
+  <div class="banner pause" id="pauseBanner" hidden></div>
+  <div class="tiles" id="tiles"></div>
+
+  <section class="panel">
+    <div class="row">
+      <h2>Puffer</h2>
+      <div class="legend">
+        <span><i style="background:var(--c1)"></i>oben</span><span><i style="background:var(--c2)"></i>mitte</span>
+        <span><i style="background:var(--c3)"></i>unten</span><span><i style="background:var(--c4);height:2px"></i>Mittel</span>
+        <span><i style="background:var(--burn);height:10px"></i>Holz brennt</span>
+        <span><i style="background:var(--pellet);height:10px"></i>Pellet brennt</span>
+      </div>
+      <select id="hours"><option value="6">6 h</option><option value="24" selected>24 h</option><option value="48">48 h</option><option value="96">96 h</option><option value="168">Woche</option></select>
+    </div>
+    <div class="chartwrap" id="wrapT"><svg id="chartT" viewBox="0 0 1000 260" preserveAspectRatio="none"></svg></div>
+    <div class="nav">
+      <button id="navZur" title="zurück">◀</button>
+      <input type="range" id="navPos" min="0" max="1000" value="1000" title="Zeitpunkt (ziehen)">
+      <button id="navVor" title="vor">▶</button>
+      <button id="navJetzt">jetzt</button>
+      <span id="navLabel">jetzt</span>
+    </div>
+    <div class="row" style="margin-top:12px"><h2>Trend Puffer-Mittel (K/h)</h2>
+      <div class="legend"><span><i style="background:var(--c4)"></i>Trend</span><span><i style="background:var(--c3)"></i>netto (ohne Sonne/Heizung)</span><span><i style="background:var(--ok)"></i>Start-Schwelle</span><span><i style="background:var(--bad)"></i>Ende-Schwelle</span></div></div>
+    <div class="chartwrap" id="wrapS"><svg id="chartS" viewBox="0 0 1000 140" preserveAspectRatio="none"></svg></div>
+  </section>
+
+  <section class="panel">
+    <div class="row"><h2>Ereignisse</h2><span class="muted" id="notify"></span><button id="btnTest" style="font:inherit;padding:5px 10px;border-radius:7px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer">Testnachricht senden</button></div>
+    <div id="events"></div>
+    <div class="pausebar" id="pausebar">Wartungspause (misst weiter, schickt aber keine Push-Nachrichten):
+      <button data-h="4">4 Stunden</button><button data-h="16">bis morgen</button><button data-h="24">24 Stunden</button><button data-h="168">1 Woche</button>
+    </div>
+  </section>
+
+  <section class="panel" id="subscribe" hidden>
+    <div class="row"><h2>Push-Nachrichten aufs Handy</h2></div>
+    <div class="sub">
+      <div id="qr" class="qr" title="Mit dem Handy scannen"></div>
+      <ol>
+        <li>App <b>ntfy</b> installieren (Google Play, F-Droid oder App Store).</li>
+        <li>In der App auf <b>+</b> tippen und dieses Thema eintragen:
+          <div class="topic"><code id="topic"></code><button id="btnCopy">Kopieren</button></div>
+          Server: <code id="server"></code><span id="serverHint"></span></li>
+        <li id="liTest">Fertig – danach mit „Testnachricht senden“ prüfen.</li>
+      </ol>
+    </div>
+    <p class="muted">Oder den QR-Code scannen bzw. den Link <a id="link" target="_blank" rel="noopener"></a> öffnen und dort abonnieren.
+      Das Thema nur an Personen weitergeben, die die Meldungen bekommen sollen – wer den Namen kennt, kann mitlesen.</p>
+  </section>
+
+  <p class="muted" id="cfg"></p>
+</main>
+
+<script src="vendor/qrcode.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const f1 = (x) => (x === null || x === undefined || x === '') ? '–' : Number(x).toFixed(1);
+const hhmm = (ts) => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+let data = null;
+let ansichtBis = null;   // Ende des Diagramm-Ausschnitts (Unix-Zeit), null = jetzt (läuft mit)
+const HV = { STATE_OFF: 'Aus', STATE_IGNITION: 'Zündung', STATE_EFFICIENCY_FIRE: 'Leistungsbrand', STATE_BURN_OUT: 'Ausbrand', STATE_RESIDUAL_HEATING: 'Restwärme', STATE_DEASHING: 'Entaschung' };
+const ZK = { 0: 'Initialisierung', 1: 'Aus', 2: 'Startvorbereitung', 3: 'Kesselstart', 4: 'Zündüberwachung', 5: 'Zündung',
+  6: 'Übergang Leistungsbrand', 7: 'Leistungsbrand', 8: 'Bereitschaft', 9: 'Halt für Entaschung', 10: 'Entaschung',
+  11: 'Abkühlen', 12: 'Reinigung', 15: 'Handbetrieb', 17: 'Verbrennungsassistent' };
+
+async function load() {
+  try {
+    const r = await fetch('api.php?action=monitor&hours=' + $('hours').value + (ansichtBis ? '&bis=' + ansichtBis : ''));
+    data = await r.json();
+  } catch (e) { $('banner').className = 'banner bad'; $('banner').textContent = 'API nicht erreichbar.'; return; }
+  if (data.ok === false) { $('banner').className = 'banner bad'; $('banner').textContent = data.error || 'Keine Daten.'; return; }
+  render();
+}
+
+// Pelletverbrauch: heute, letzte 7 Tage (aus den Tageszählern des Monitors) und Lagerstand
+function pelletKg(s, c) {
+  const tage = s?.pellet_tage ? Object.entries(s.pellet_tage) : [];
+  if (!tage.length) return '';
+  const heute = tage[tage.length - 1][1].kg, woche = tage.slice(-7).reduce((a, [, t]) => a + t.kg, 0);
+  const n = Math.min(7, tage.length);
+  return `<br>Pellets heute ${Math.round(heute)}` + (n > 1 ? ` · Woche ${Math.round(woche)}` : '') + (c?.PLAGER ? ` · Lager ${Math.round(c.PLAGER)}` : '') + ' kg';
+}
+
+function render() {
+  const d = data, s = d.state, c = s?.current;
+  const age = s?.last_tick ? d.now - s.last_tick : null;
+  const b = $('banner');
+  const neustart = 'Auf dem Raspi: <code>sudo systemctl restart heizung-monitor</code>';
+  if (d.version) $('ver').textContent = `Version ${d.version.nr} · ${d.version.datum}`;
+  // Online-Anzeige: nur ansehen, keine Bedienung
+  const nur = !!d.nur_anzeige;
+  for (const id of ['lnkTelnet', 'btnTest', 'pausebar', 'liTest']) $(id).hidden = nur;
+  const o = d.online;
+  $('online').textContent = nur ? 'Online-Anzeige (nur ansehen)'
+    : o ? (o.fehler ? `Online-Anzeige: Fehler ${hhmm(o.versuch_ts)} – ${o.fehler}`
+         : `Online-Anzeige: gesendet ${hhmm(o.ok_ts)}` + (o.verlauf && o.server_letzter_ts != null && o.server_letzter_ts < d.now - 3600
+           ? ` · Verlauf nachholen, Stand ${new Date(o.server_letzter_ts * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}` : '')) : '';
+  if (nur) {
+    const grenze = 3 * d.config.interval + 2 * 180;
+    if (age === null) { b.className = 'banner bad'; b.textContent = 'Noch keine Messdaten vom Raspi.'; }
+    else if (age > grenze) { b.className = 'banner bad'; b.textContent = `Keine aktuellen Daten vom Raspi – letzte Messung ${hhmm(s.last_tick)} (vor ${Math.round(age / 60)} min).`; }
+    else if (s.verbindung_alarm) { b.className = 'banner bad'; b.textContent = 'Der Raspi läuft, aber die Kesselsteuerung liefert keine Daten.'; }
+    else { b.className = 'banner ok'; b.textContent = `Daten vom Raspi · letzte Messung ${hhmm(s.last_tick)}`; }
+  }
+  else if (age === null) { b.className = 'banner bad'; b.innerHTML = 'Der Monitor ist noch nie gelaufen. ' + neustart; }
+  else if (age > 3 * d.config.interval) { b.className = 'banner bad'; b.innerHTML = `Monitor läuft nicht (letzte Messung vor ${Math.round(age / 60)} min). ${neustart}`; }
+  else if (d.version && s.version !== d.version.nr) { b.className = 'banner bad';
+    b.innerHTML = `Neue Version ${d.version.nr} ist aufgespielt, der Monitor läuft aber noch mit ${s.version ? 'Version ' + s.version : 'einer älteren Version'}. ${neustart}`; }
+  else if (s.verbindung_alarm) { b.className = 'banner bad'; b.textContent = 'Monitor läuft, aber die Kesselsteuerung liefert keine Daten.'; }
+  else { b.className = 'banner ok'; b.textContent = `Monitor läuft · letzte Messung ${hhmm(s.last_tick)}`; }
+
+  const burn = s?.holz === 'brennt';
+  const kalt = s?.puffer_kalt;
+  // Heizkreispumpen im Statuswort 2: Bit 3 = HK 1 (ALTBAU), Bit 6 = HK 2 (NEUBAU)
+  const hkTile = (() => {
+    const p = Number(c?.PUMPEN ?? NaN);
+    const hk = [['ALTBAU', 3, c?.HK1_VL], ['NEUBAU', 6, c?.HK2_VL]]
+      .map(([name, bit, vl]) => ({ name, vl, an: !isNaN(p) && ((p >> bit) & 1) === 1 }));
+    const n = hk.filter(x => x.an).length;
+    const ausgl = d.config.verbrauch?.ausgleich;
+    return { l: 'Heizkreise', v: isNaN(p) ? '–' : (n === 2 ? 'beide an' : n === 1 ? 'einer an' : 'aus'),
+      s: hk.map(x => `${x.name} ${f1(x.vl)}° ${isNaN(p) ? '' : (x.an ? 'an' : 'aus')}`.trim()).join(' · ') +
+         (ausgl && c?.heizung ? ` · zieht ca. ${f1(-(c.verbrauch ?? 0))} K/h` : '') };
+  })();
+  // Scheitholzkessel: Zustand aus der Hargassner-Cloud (löst die Meldungen aus). Ohne aktuelle Cloud-Daten
+  // erkennt der Monitor das Feuer ersatzweise über den Puffer.
+  const pufferErk = burn ? 'brennt seit ' + hhmm(s.holz_seit) : (s?.start_kand ? 'Anstieg erkannt …' : 'kein Feuer');
+  const hvTile = (d.config.cloud && c?.hv)
+    ? { l: 'Scheitholzkessel', v: HV[c.hv.zustand] ?? c.hv.zustand,
+        s: `Rauchgas ${f1(c.hv.rauchgas)}° · Kessel ${f1(c.hv.kessel)}°` + (burn ? `<br>brennt seit ${hhmm(s.holz_seit)}` : ''),
+        cls: c.hv.zustand !== 'STATE_OFF' || burn ? 'hot' : '' }
+    : { l: 'Scheitholzkessel', v: burn ? 'brennt' : 'aus',
+        s: `Ersatz-Erkennung über den Puffer: ${pufferErk}` + (d.config.cloud ? '<br>keine aktuellen Cloud-Daten' : ''), cls: burn ? 'hot' : '' };
+  const tiles = [
+    { l: 'Pelletkessel', v: c ? (c.pellet_aus ? (c.pellet_ruhig === false ? 'Nachlauf' : 'aus') : 'an') : '–',
+      s: `${ZK[c?.ZK] ?? 'Zustand ' + (c?.ZK ?? '?')}${c && !c.pellet_aus && c.PLEIST != null ? ' ' + Math.round(c.PLEIST) + ' %' : ''} · Kessel ${f1(c?.TK)}° · Rauchgas ${f1(c?.TRG)}°` + pelletKg(s, c) },
+    hvTile,
+    { l: 'Sonne', v: c?.sonne != null ? Math.round(c.sonne) + ' W/m²' : '–',
+      s: (c?.sonne == null ? (d.config.sonne?.enabled ? 'keine Wetterdaten' : 'aus') : (c.solar > 0.05 ? `Solar ca. +${f1(c.solar)} K/h` : 'Solar liefert kaum'))
+         + (c?.TAUS != null ? `<br>außen ${f1(c.TAUS)} °C` : '') },
+    { l: 'Puffer oben', v: f1(c?.TPO) + '°', s: `mitte ${f1(c?.TPM)}° · unten ${f1(c?.TPU)}°`, cls: kalt ? 'alarm' : '' },
+    { l: 'Füllgrad', v: (c?.PFD ?? '–') + ' %', s: 'Mittel ' + f1(c?.mittel) + ' °C' },
+    { l: 'Trend', v: (c?.trend > 0 ? '+' : '') + f1(c?.trend),
+      s: (c?.netto !== undefined && c?.netto !== null && Math.abs(c.netto - c.trend) > 0.05 ? `netto ${c.netto > 0 ? '+' : ''}${f1(c.netto)} · ` : '') + 'K/h, ' + d.config.holz.fenster_min + ' min' },
+    hkTile,
+  ];
+  // lange Werte (z. B. "Leistungsbrand") so klein setzen, dass sie in die Kachelbreite passen (cqw = % der Kachelbreite)
+  const vDiv = v => { const n = String(v).replace(/<[^>]*>/g, '').length;
+    return n > 9 ? `<div class="v lang" style="font-size:14px;font-size:min(24px,${(100 / (n * 0.62)).toFixed(2)}cqw)">${v}</div>` : `<div class="v">${v}</div>`; };
+  $('tiles').innerHTML = tiles.map(t => `<div class="tile ${t.cls || ''}"><div class="l">${t.l}</div>${vDiv(t.v)}<div class="s">${t.s}</div></div>`).join('');
+
+  drawCharts(d.history, d.config);
+  for (const id of ['chartT', 'chartS']) $(id).style.transform = '';   // Verschieben beim Ziehen zurücksetzen
+  navAnzeigen();
+  renderSubscribe(d.config.ntfy);
+  const pb = $('pauseBanner');
+  if (d.pause) {
+    const bis = new Date(d.pause.bis * 1000);
+    pb.hidden = false;
+    pb.innerHTML = `<span>⏸ Wartungspause bis ${bis.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' })} ${bis.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} – keine Push-Nachrichten.</span>` + (d.nur_anzeige ? '' : '<button id="btnPauseEnde">Pause beenden</button>');
+    if (!d.nur_anzeige) $('btnPauseEnde').onclick = () => setPause(0);
+  } else pb.hidden = true;
+
+  $('events').innerHTML = d.events.length ? d.events.map(e => `<div class="ev"><span class="t">${e.zeit.slice(8, 10)}.${e.zeit.slice(5, 7)}. ${e.zeit.slice(11, 16)}</span>
+    <b class="${e.level}">${e.title}</b><span class="x">${e.text}${e.versand && Object.keys(e.versand).length ? ' · Versand: ' + Object.entries(e.versand).map(([k, v]) => k + ' ' + v).join(', ') : ''}</span></div>`).join('')
+    : '<p class="muted">Noch keine Ereignisse.</p>';
+  const on = Object.entries(d.config.notify).filter(([, v]) => v).map(([k]) => k);
+  $('notify').textContent = on.length ? 'Push aktiv: ' + on.join(', ') : 'Push noch nicht eingerichtet – nur Protokoll';
+  const h = d.config.holz, p = d.config.puffer;
+  const z = d.config.zeitfenster, n = d.config.nachlegen, pw = d.config.pellet_warnung;
+  $('cfg').textContent = `Push-Regeln: „Jetzt nachlegen“ beim Ausbrand, wenn Puffer unten < ${n?.puffer_unten_max} °C und ${z ? z.von + '–' + z.bis + ' Uhr' : 'jederzeit'}. ` +
+    `„Bald startet der Pelletkessel – jetzt Holz anheizen“, wenn der Füllgrad unter ${pw?.fuellgrad_unter} % oder Puffer oben auf ${pw?.puffer_oben_bis} °C fällt und weder Holz noch Pellet heizt (außerhalb der Zeit: Meldung zu Beginn des Zeitfensters). ` +
+    `Holzfeuer und Ausbrand laut Hargassner-Cloud (Leistungsbrand → Ausbrand). Ersatz ohne Cloud-Daten: Pelletkessel aus und ${h.pellet_nachlauf_min ?? 30} min Nachlauf vorbei, Puffer-Mittel steigt netto ≥ ${h.start_k_pro_h} K/h für ${h.start_bestaetigen_min} min = Holz brennt; ` +
+    `Trend ${h.ende_bestaetigen_min} min ≤ ${h.ende_k_pro_h} K/h oder Pelletstart = Ausbrand. ` +
+    (d.config.abend?.enabled ? `Um ${d.config.abend.um} Uhr „Heute Abend noch Holz anheizen?“, wenn das Puffer-Mittel bis ${d.config.abend.morgen} Uhr voraussichtlich unter ${d.config.abend.mittel_min} °C fällt (Abkühlung ${d.config.abend.verlust_k_pro_h} K/h) und weder Holz noch Pellet heizt` +
+      (s?.abend ? ` – zuletzt ${s.abend.tag.slice(8, 10)}.${s.abend.tag.slice(5, 7)}.: ${s.abend.mittel} °C → ${s.abend.prognose} °C, ${s.abend.ergebnis}.` : '.') : '');
+}
+
+let subDone = false;
+function renderSubscribe(n) {
+  if (!n || subDone) { if (!n) $('subscribe').hidden = true; return; }
+  subDone = true;
+  $('subscribe').hidden = false;
+  const url = `${n.server}/${n.topic}`;
+  $('topic').textContent = n.topic;
+  $('server').textContent = n.server.replace(/^https?:\/\//, '');
+  $('serverHint').textContent = n.server === 'https://ntfy.sh' ? ' (Standard, nichts ändern)' : ' (in der App unter „Anderen Server verwenden“ eintragen)';
+  $('link').href = url; $('link').textContent = url;
+  $('btnCopy').onclick = async () => {
+    try { await navigator.clipboard.writeText(n.topic); } catch {
+      const r = document.createRange(); r.selectNodeContents($('topic'));
+      getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy');
+    }
+    $('btnCopy').textContent = 'Kopiert ✓'; setTimeout(() => $('btnCopy').textContent = 'Kopieren', 2000);
+  };
+  if (window.qrcode) {
+    const q = qrcode(0, 'M'); q.addData(url); q.make();
+    $('qr').innerHTML = q.createSvgTag({ cellSize: 4, margin: 0 });
+  }
+}
+
+function drawCharts(rows, cfg) {
+  const W = 1000, padL = 36, padR = 8;
+  const t1 = data.history_bis ? Number(data.history_bis) : Number(rows[rows.length - 1]?.ts || data.now), t0 = t1 - Number($('hours').value) * 3600;
+  const X = (ts) => padL + (ts - t0) / (t1 - t0) * (W - padL - padR);
+
+  // Hinterlegte Zeiträume: Holz brennt (laut Monitor) und Pellet brennt (Kesselzustand außer 0 Init, 1 Aus, 8 Bereitschaft)
+  const PELLET_AUS = ['0', '1', '8'];
+  const LUECKE = 15 * 60;   // so lange ohne Messung = Datenlücke (Wartung, Stromausfall): nichts darüber zeichnen
+  const luecke = (i) => i > 0 && rows[i].ts - rows[i - 1].ts > LUECKE;
+  const bands = (top, bottom, test, color) => {
+    let out = '', start = null;
+    rows.forEach((r, i) => {
+      if (luecke(i) && start !== null) { out += `<rect x="${X(start)}" y="${top}" width="${Math.max(1, X(rows[i - 1].ts) - X(start))}" height="${bottom - top}" fill="${css(color)}"/>`; start = null; }
+      const b = test(r);
+      if (b && start === null) start = r.ts;
+      if ((!b || i === rows.length - 1) && start !== null) { out += `<rect x="${X(start)}" y="${top}" width="${Math.max(1, X(r.ts) - X(start))}" height="${bottom - top}" fill="${css(color)}"/>`; start = null; }
+    });
+    return out;
+  };
+  const pelletAn = r => r.ZK !== '' && r.ZK !== undefined && !PELLET_AUS.includes(String(Number(r.ZK)));
+  // Verbrauch je Pellet-Brennzeit (Zählerstand Ende − Anfang) als Beschriftung oben im lila Feld
+  const pelletLabels = (top) => {
+    let out = '', start = null, z0 = null, z1 = null;
+    const z = r => (r.PVERBR !== undefined && r.PVERBR !== '' ? Number(r.PVERBR) : null);
+    rows.forEach((r, i) => {
+      const an = pelletAn(r);
+      if (an && start === null) { start = r.ts; z0 = z(r); }
+      if (an && z(r) !== null) { z0 ??= z(r); z1 = z(r); }
+      if ((!an || i === rows.length - 1) && start !== null) {
+        const kg = z0 !== null && z1 !== null ? z1 - z0 : null, x = (X(start) + X(r.ts)) / 2;
+        if (kg !== null && kg >= 0 && X(r.ts) - X(start) > 24) out += `<text x="${x}" y="${top + 13}" text-anchor="middle" style="fill:var(--ink)">${kg} kg</text>`;
+        start = null; z0 = z1 = null;
+      }
+    });
+    return out;
+  };
+  const burnRects = (H, top, bottom) =>
+    bands(top, bottom, pelletAn, '--pellet') + bands(top, bottom, r => r.holz === 'brennt', '--burn');
+  const timeAxis = (H) => {
+    // Raster an Ortszeit ausrichten; Mitternacht mit Wochentag und Datum beschriften
+    const span = t1 - t0, stepH = span > 100 * 3600 ? 24 : span > 50 * 3600 ? 12 : span > 30 * 3600 ? 6 : span > 8 * 3600 ? 3 : 1;
+    const d = new Date(t0 * 1000); d.setMinutes(0, 0, 0); d.setHours(Math.ceil(d.getHours() / stepH) * stepH);
+    let out = '';
+    for (; d.getTime() / 1000 <= t1; d.setHours(d.getHours() + stepH)) {
+      const t = d.getTime() / 1000; if (t < t0) continue;
+      const mitternacht = d.getHours() === 0;
+      const txt = mitternacht ? d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' }) : hhmm(t);
+      out += `<line x1="${X(t)}" x2="${X(t)}" y1="6" y2="${H - 18}" stroke="${css(mitternacht && span > 20 * 3600 ? '--muted' : '--grid')}"/><text x="${X(t)}" y="${H - 4}" text-anchor="middle">${txt}</text>`;
+    }
+    return out;
+  };
+  const line = (key, Y, color, w = 2, dash = '') => {
+    let dStr = '', pen = false;
+    rows.forEach((r, i) => {
+      const v = r[key];
+      if (luecke(i)) pen = false;
+      if (v === '' || v === undefined || Number(v) < -19) { pen = false; return; }
+      dStr += (pen ? 'L' : 'M') + X(Number(r.ts)).toFixed(1) + ',' + Y(Number(v)).toFixed(1); pen = true;
+    });
+    return `<path d="${dStr}" fill="none" stroke="${color}" stroke-width="${w}" ${dash ? `stroke-dasharray="${dash}"` : ''} vector-effect="non-scaling-stroke"/>`;
+  };
+  const yAxis = (lo, hi, Y, ticks, unit) => {
+    let out = ''; for (const v of ticks) out += `<line x1="${padL}" x2="${W - padR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${css('--grid')}"/><text x="${padL - 4}" y="${Y(v) + 4}" text-anchor="end">${v}${unit}</text>`;
+    return out;
+  };
+
+  // Temperaturen
+  {
+    const H = 260, top = 8, bottom = H - 20;
+    const vals = rows.flatMap(r => ['TPO', 'TPM', 'TPU'].map(k => Number(r[k]))).filter(v => !isNaN(v) && v > -19);
+    let lo = vals.length ? Math.floor(Math.min(...vals) / 10) * 10 : 20, hi = vals.length ? Math.ceil(Math.max(...vals) / 10) * 10 : 90;
+    lo = Math.min(lo, cfg.puffer.kalt_unter - 5); if (hi - lo < 20) hi = lo + 20;
+    const Y = (v) => bottom - (v - lo) / (hi - lo) * (bottom - top);
+    const ticks = []; for (let v = lo; v <= hi; v += 10) ticks.push(v);
+    $('chartT').innerHTML = burnRects(H, top, bottom) + pelletLabels(top) + yAxis(lo, hi, Y, ticks, '°') + timeAxis(H) +
+      `<line x1="${padL}" x2="${W - padR}" y1="${Y(cfg.puffer.kalt_unter)}" y2="${Y(cfg.puffer.kalt_unter)}" stroke="${css('--bad')}" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>` +
+      line('TPU', Y, css('--c3')) + line('TPM', Y, css('--c2')) + line('TPO', Y, css('--c1')) + line('mittel', Y, css('--c4'), 1.5, '5 3') +
+      (rows.length ? '' : `<text x="500" y="130" text-anchor="middle">Noch kein Verlauf – Monitor starten</text>`);
+  }
+  // Trend
+  {
+    const H = 140, top = 8, bottom = H - 20;
+    const vals = rows.flatMap(r => [r.trend, r.netto]).filter(v => v !== '' && v !== undefined).map(Number).filter(v => !isNaN(v));
+    const m = Math.max(5, Math.ceil(Math.max(...vals.map(Math.abs), cfg.holz.start_k_pro_h) + 1));
+    const Y = (v) => bottom - (v + m) / (2 * m) * (bottom - top);
+    const hl = (v, c) => `<line x1="${padL}" x2="${W - padR}" y1="${Y(v)}" y2="${Y(v)}" stroke="${c}" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+    $('chartS').innerHTML = burnRects(H, top, bottom) + yAxis(-m, m, Y, [-m, 0, m], '') + timeAxis(H) +
+      hl(cfg.holz.start_k_pro_h, css('--ok')) + hl(cfg.holz.ende_k_pro_h, css('--bad')) + line('trend', Y, css('--c4'), 1.5) + line('netto', Y, css('--c3'), 1.5, '4 3');
+  }
+}
+
+$('btnTest').onclick = async () => {
+  const b = $('btnTest'); b.disabled = true; b.textContent = 'Sende …';
+  try {
+    const r = await (await fetch('api.php?action=notify_test', { method: 'POST' })).json();
+    b.textContent = r.ok ? 'Gesendet ✓' : 'Fehler';
+    if (!r.ok) alert(r.error || JSON.stringify(r.result));
+  } catch (e) { b.textContent = 'Fehler'; alert(e.message); }
+  setTimeout(() => { b.disabled = false; b.textContent = 'Testnachricht senden'; }, 4000);
+};
+async function setPause(stunden) {
+  await fetch('api.php?action=pause', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ stunden }) });
+  load();
+}
+document.querySelectorAll('.pausebar button').forEach(b => b.onclick = () => setPause(Number(b.dataset.h)));
+$('hours').onchange = load;
+
+// ---- Zeitachse verschieben: ziehen (Maus/Finger), Trackpad/Shift+Mausrad, Schieberegler, Knöpfe ----
+const fenster = () => Number($('hours').value) * 3600;
+const jetzt = () => Math.floor(Date.now() / 1000);
+function setzeEnde(t) {
+  const von = (data?.history_von ?? jetzt() - 7 * 86400) + fenster();
+  t = Math.round(t);
+  ansichtBis = t >= jetzt() - 120 ? null : Math.max(Math.min(von, jetzt()), t);
+  navAnzeigen();
+  load();
+}
+function navAnzeigen() {
+  const von = (data?.history_von ?? jetzt() - 7 * 86400) + fenster(), bis = jetzt(), ende = ansichtBis ?? bis;
+  $('navPos').value = bis > von ? Math.round((ende - von) / (bis - von) * 1000) : 1000;
+  $('navLabel').textContent = ansichtBis ? 'bis ' + new Date(ende * 1000).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'jetzt';
+  $('navVor').disabled = $('navJetzt').disabled = !ansichtBis;
+  $('navZur').disabled = ende - fenster() <= von - fenster() + 60;
+}
+$('navZur').onclick = () => setzeEnde((ansichtBis ?? jetzt()) - fenster() / 2);
+$('navVor').onclick = () => setzeEnde((ansichtBis ?? jetzt()) + fenster() / 2);
+$('navJetzt').onclick = () => setzeEnde(jetzt());
+$('navPos').oninput = () => {   // beim Ziehen nur die Beschriftung, geladen wird beim Loslassen
+  const von = (data?.history_von ?? jetzt() - 7 * 86400) + fenster(), t = von + (jetzt() - von) * $('navPos').value / 1000;
+  $('navLabel').textContent = $('navPos').value >= 999 ? 'jetzt' : 'bis ' + new Date(t * 1000).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+};
+$('navPos').onchange = () => { const von = (data?.history_von ?? jetzt() - 7 * 86400) + fenster(); setzeEnde(von + (jetzt() - von) * $('navPos').value / 1000); };
+for (const w of [$('wrapT'), $('wrapS')]) {
+  let x0 = null, breite = 1;
+  const svgs = () => [$('chartT'), $('chartS')];
+  w.addEventListener('pointerdown', e => { x0 = e.clientX; breite = w.clientWidth; w.setPointerCapture(e.pointerId); w.classList.add('drag'); });
+  w.addEventListener('pointermove', e => { if (x0 === null) return; for (const s of svgs()) s.style.transform = `translateX(${e.clientX - x0}px)`; });
+  const ende = e => {
+    if (x0 === null) return;
+    const dx = e.clientX - x0; x0 = null; w.classList.remove('drag');
+    if (Math.abs(dx) < 4) { for (const s of svgs()) s.style.transform = ''; return; }
+    setzeEnde((ansichtBis ?? jetzt()) - dx / breite * fenster());
+  };
+  w.addEventListener('pointerup', ende); w.addEventListener('pointercancel', ende);
+  let rad = 0, radTimer = null;   // Trackpad seitlich oder Shift + Mausrad
+  w.addEventListener('wheel', e => {
+    const dx = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+    if (!dx) return;
+    e.preventDefault(); rad += dx;
+    for (const s of svgs()) s.style.transform = `translateX(${-rad}px)`;
+    clearTimeout(radTimer);
+    radTimer = setTimeout(() => { const r = rad; rad = 0; setzeEnde((ansichtBis ?? jetzt()) + r / w.clientWidth * fenster()); }, 250);
+  }, { passive: false });
+}
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hargassner Telnet-Test</title>
+<style>
+  :root {
+    --bg: #f4f2ee; --panel: #ffffff; --ink: #1d1f21; --muted: #6b6f74; --line: #e2ded6;
+    --accent: #c4531c; --accent-ink: #fff; --ok: #2f7d4f; --bad: #b3261e; --warn: #a66a00;
+    --flash: #ffe9a8; --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17181a; --panel: #212326; --ink: #e8e6e3; --muted: #9a9ea3; --line: #34373b;
+            --accent: #e0703a; --flash: #5a4a14; --ok: #5cbf85; --bad: #ef6b62; --warn: #e0a640; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  header { padding: 18px 24px 10px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: .2px; }
+  header h1 span { color: var(--accent); }
+  header .sub { color: var(--muted); font-size: 13px; }
+  main { display: grid; grid-template-columns: 300px 1fr; gap: 18px; padding: 8px 24px 32px; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; padding: 8px 12px 24px; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .devices { padding: 6px; align-self: start; }
+  .dev { padding: 10px 12px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+  .dev + .dev { margin-top: 4px; }
+  .dev:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .dev.active { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); }
+  .dev .n { font-weight: 600; }
+  .dev .h { font: 12px var(--mono); color: var(--muted); }
+  .dev .chips { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
+  .chip { font: 11px var(--mono); padding: 1px 6px; border-radius: 99px; border: 1px solid var(--line); color: var(--muted); }
+  .chip.open { color: var(--ok); border-color: var(--ok); }
+  .chip.closed { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, transparent); }
+  .work { padding: 16px 18px; min-width: 0; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--line);
+           background: var(--panel); color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:disabled { opacity: .5; cursor: default; }
+  label.toggle { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: 14px; user-select: none; }
+  select { font: inherit; padding: 5px 6px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .status { margin: 12px 0 6px; font-size: 14px; color: var(--muted); min-height: 21px; }
+  .status.ok { color: var(--ok); } .status.bad { color: var(--bad); } .status.warn { color: var(--warn); }
+  .note { font-size: 13px; color: var(--muted); border-left: 3px solid var(--accent); padding: 4px 10px; margin: 8px 0 12px; }
+  .raw { font: 12px/1.5 var(--mono); background: color-mix(in srgb, var(--ink) 5%, transparent);
+         padding: 10px 12px; border-radius: 8px; white-space: pre-wrap; word-break: break-all; margin: 0 0 14px; max-height: 150px; overflow: auto; }
+  .tablewrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px;
+       color: var(--muted); border-bottom: 1px solid var(--line); padding: 6px 8px; position: sticky; top: 0; background: var(--panel); }
+  td { border-bottom: 1px solid var(--line); padding: 3px 8px; vertical-align: middle; }
+  td.idx { font: 12px var(--mono); color: var(--muted); width: 40px; }
+  td.val { font: 600 14px var(--mono); text-align: right; white-space: nowrap; transition: background 1.2s; }
+  td.val.flash { background: var(--flash); transition: none; }
+  td.mm { font: 12px var(--mono); color: var(--muted); text-align: right; white-space: nowrap; }
+  td.ch { font: 12px var(--mono); color: var(--muted); text-align: right; }
+  td input { width: 100%; font: inherit; border: 1px solid transparent; background: transparent; color: var(--ink); padding: 3px 4px; border-radius: 5px; }
+  td input:hover, td input:focus { border-color: var(--line); outline: none; background: var(--bg); }
+  td.key input { font: 13px var(--mono); width: 90px; }
+  td.unit input { width: 50px; }
+  tr.own td.key input { color: var(--accent); }
+  .hexbits { font: 11px var(--mono); color: var(--muted); font-weight: 400; display: block; }
+  .empty { padding: 40px 10px; text-align: center; color: var(--muted); }
+  .muted { color: var(--muted); }
+  details { margin-top: 10px; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hargassner <span>Telnet-Test</span></h1>
+  <div class="sub">Liest die Klartext-Datensätze (pm …) der Kesselregelung über TCP-Port 23</div>
+</header>
+
+<main>
+  <aside class="panel devices" id="devices"><div class="empty">Lade Geräte …</div></aside>
+
+  <section class="panel work">
+    <div class="toolbar">
+      <button class="primary" id="btnRead">Jetzt lesen</button>
+      <button id="btnProbe">Port-Test</button>
+      <label class="toggle"><input type="checkbox" id="live"> Live alle
+        <select id="interval"><option>3</option><option selected>5</option><option>10</option><option>30</option></select> s</label>
+      <span style="flex:1"></span>
+      <label class="toggle"><input type="checkbox" id="onlyChanged"> nur veränderliche</label>
+      <button id="btnSave">Bezeichnungen speichern</button>
+      <button id="btnCsv" title="Bisher gelesene Datensätze dieses Geräts als CSV">CSV</button>
+    </div>
+
+    <div class="status" id="status">Gerät links auswählen.</div>
+    <div class="note" id="note" hidden></div>
+    <pre class="raw" id="raw" hidden></pre>
+
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Kürzel</th><th>Bezeichnung</th><th style="text-align:right">Wert</th>
+          <th>Einheit</th><th style="text-align:right">Min</th><th style="text-align:right">Max</th>
+          <th style="text-align:right" title="Wie oft sich der Wert seit Start geändert hat">Δ</th>
+        </tr></thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">Noch keine Daten.</td></tr></tbody>
+      </table>
+    </div>
+
+    <details>
+      <summary>Tipps zum Zuordnen der Werte</summary>
+      <p>Lass „Live“ laufen und vergleiche mit dem Kesseldisplay: Temperaturen ändern sich langsam,
+      O2 und Gebläse schnell, Zustandscodes springen bei Phasenwechseln (Zündung, Leistungsbrand, Ausbrand).
+      Werte um −20 bzw. 0 deuten oft auf nicht angeschlossene Fühler hin. Bezeichnungen direkt in der Tabelle
+      eintragen und speichern – sie landen in <code>data/labels_&lt;gerät&gt;.json</code>.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { devices: [], cur: null, timer: null, busy: false, stats: {}, history: {}, labels: {} };
+
+async function api(action, id, body) {
+  const url = `api.php?action=${action}` + (id ? `&id=${encodeURIComponent(id)}` : '');
+  const opt = body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {};
+  const r = await fetch(url, opt);
+  const t = await r.text();
+  try { return JSON.parse(t); } catch { return { ok: false, error: 'Antwort ist kein JSON (PHP-Fehler?): ' + t.slice(0, 200) }; }
+}
+
+function setStatus(msg, cls = '') { const s = $('status'); s.textContent = msg; s.className = 'status ' + cls; }
+
+function renderDevices() {
+  const box = $('devices');
+  box.innerHTML = '';
+  for (const d of state.devices) {
+    const el = document.createElement('div');
+    el.className = 'dev' + (state.cur === d.id ? ' active' : '');
+    el.innerHTML = `<div class="n"></div><div class="h">${d.host}:${d.port}</div><div class="chips" id="chips-${d.id}"></div>`;
+    el.querySelector('.n').textContent = d.name;
+    el.onclick = () => select(d.id);
+    box.appendChild(el);
+    if (d.probe) renderChips(d);
+  }
+}
+
+function renderChips(d) {
+  const c = $('chips-' + d.id);
+  if (!c) return;
+  c.innerHTML = d.probe.map(p => `<span class="chip ${p.open ? 'open' : 'closed'}" title="${p.open ? p.ms + ' ms' : (p.error || '')}">${p.port} ${p.open ? 'offen' : 'zu'}</span>`).join('');
+}
+
+function cur() { return state.devices.find(d => d.id === state.cur); }
+
+function select(id) {
+  stopLive();
+  state.cur = id;
+  const d = cur();
+  state.labels[id] = state.labels[id] || JSON.parse(JSON.stringify(d.mapping.fields || {}));
+  renderDevices();
+  const note = $('note');
+  note.hidden = false;
+  note.textContent = `Belegung: ${d.mapping.name}` + (d.mapping.note ? ' – ' + d.mapping.note : '');
+  $('raw').hidden = true;
+  renderTable(state.stats[id]?.last || null);
+  setStatus(`${d.name} ausgewählt. „Port-Test“ prüft die Erreichbarkeit, „Jetzt lesen“ holt einen Datensatz.`);
+}
+
+async function probe() {
+  const d = cur(); if (!d) return;
+  setStatus(`Prüfe Ports auf ${d.host} …`);
+  const r = await api('probe', d.id);
+  if (!r.ok) return setStatus(r.error, 'bad');
+  d.probe = r.ports;
+  renderChips(d);
+  const t = r.ports.find(p => p.port === d.port);
+  setStatus(t?.open ? `Port ${d.port} ist offen (${t.ms} ms) – jetzt lesen.` : `Port ${d.port} nicht erreichbar: ${t?.error || ''}`, t?.open ? 'ok' : 'bad');
+}
+
+async function read() {
+  const d = cur(); if (!d || state.busy) return;
+  state.busy = true; $('btnRead').disabled = true;
+  setStatus(`Lese von ${d.host}:${d.port} …`);
+  const r = await api('read', d.id);
+  state.busy = false; $('btnRead').disabled = false;
+  if (state.cur !== d.id) return;
+
+  const raw = $('raw');
+  if (r.raw || r.partial || (r.other && r.other.length)) {
+    raw.hidden = false;
+    raw.textContent = (r.raw || '') + (r.other?.length ? '\n\n— andere Zeilen —\n' + r.other.join('\n') : '') + (!r.raw && r.partial ? '\n\n— unvollständig —\n' + r.partial : '');
+  }
+  if (!r.ok) return setStatus(r.error, r.bytes ? 'warn' : 'bad');
+
+  updateStats(d.id, r);
+  renderTable(r);
+  setStatus(`${r.time} · ${r.values.length} Werte · ${r.pmCount} Datensätze in ${r.elapsedMs} ms empfangen`, 'ok');
+}
+
+function updateStats(id, r) {
+  const s = state.stats[id] = state.stats[id] || { min: {}, max: {}, changes: {}, prev: {}, last: null };
+  for (const v of r.values) {
+    const num = typeof v.v === 'number' ? v.v : v.dec;
+    if (num !== undefined) {
+      s.min[v.i] = s.min[v.i] === undefined ? num : Math.min(s.min[v.i], num);
+      s.max[v.i] = s.max[v.i] === undefined ? num : Math.max(s.max[v.i], num);
+    }
+    if (s.prev[v.i] !== undefined && s.prev[v.i] !== v.v) s.changes[v.i] = (s.changes[v.i] || 0) + 1;
+  }
+  s.flash = new Set(r.values.filter(v => s.prev[v.i] !== undefined && s.prev[v.i] !== v.v).map(v => v.i));
+  for (const v of r.values) s.prev[v.i] = v.v;
+  s.last = r;
+  (state.history[id] = state.history[id] || []).push({ t: r.time, v: r.values.map(x => x.v) });
+}
+
+function fmt(v) {
+  if (v === undefined) return '';
+  return typeof v === 'number' && !Number.isInteger(v) ? v.toFixed(1) : String(v);
+}
+
+function renderTable(r) {
+  const tb = $('rows');
+  if (!r) { tb.innerHTML = '<tr><td colspan="8" class="empty">Noch keine Daten.</td></tr>'; return; }
+  const id = state.cur, s = state.stats[id] || { min: {}, max: {}, changes: {}, flash: new Set() };
+  const labels = state.labels[id];
+  const onlyChanged = $('onlyChanged').checked;
+
+  // Eingaben, die gerade bearbeitet werden, nicht überschreiben
+  const focused = document.activeElement?.dataset?.f ? { i: document.activeElement.dataset.i, f: document.activeElement.dataset.f } : null;
+
+  const frag = document.createDocumentFragment();
+  for (const v of r.values) {
+    if (onlyChanged && !s.changes[v.i]) continue;
+    const L = labels[v.i] || {};
+    const tr = document.createElement('tr');
+    if (L.own) tr.className = 'own';
+    let valHtml;
+    if (L.bits) {
+      // Statuswort: immer als Hex lesen und gesetzte Bits mit Namen zeigen
+      const n = parseInt(String(v.v), 16);
+      const on = isNaN(n) ? [] : Object.entries(L.bits).filter(([b]) => (n / 2 ** Number(b)) % 2 >= 1).map(([, name]) => name);
+      const unnamed = isNaN(n) ? 0 : [...Array(32).keys()].filter(b => (n / 2 ** b) % 2 >= 1 && !(String(b) in L.bits)).length;
+      valHtml = `${v.v}<span class="hexbits">${on.length ? on.join(', ') : 'keine benannten Bits'}${unnamed ? ` (+${unnamed} unbenannt)` : ''}</span>`;
+    } else if (v.type === 'hex') {
+      valHtml = `${v.v}<span class="hexbits">${v.bits}</span>`;
+    } else {
+      valHtml = v.type === 'float' ? Number(v.v).toFixed(1) : fmt(v.v);
+      if (L.enum && L.enum[String(v.v)] !== undefined) valHtml += `<span class="hexbits">${L.enum[String(v.v)]}</span>`;
+    }
+    tr.innerHTML = `<td class="idx">${v.i}</td>
+      <td class="key"><input data-i="${v.i}" data-f="key"></td>
+      <td><input data-i="${v.i}" data-f="label" placeholder="Wert ${v.i}"></td>
+      <td class="val${s.flash?.has(v.i) ? ' flash' : ''}">${valHtml}</td>
+      <td class="unit"><input data-i="${v.i}" data-f="unit"></td>
+      <td class="mm">${fmt(s.min[v.i])}</td><td class="mm">${fmt(s.max[v.i])}</td>
+      <td class="ch">${s.changes[v.i] || ''}</td>`;
+    for (const inp of tr.querySelectorAll('input')) {
+      inp.value = L[inp.dataset.f] || '';
+      inp.oninput = () => { labels[v.i] = { ...(labels[v.i] || {}), [inp.dataset.f]: inp.value }; };
+    }
+    frag.appendChild(tr);
+  }
+  tb.innerHTML = '';
+  tb.appendChild(frag);
+  if (focused) tb.querySelector(`input[data-i="${focused.i}"][data-f="${focused.f}"]`)?.focus();
+  requestAnimationFrame(() => tb.querySelectorAll('td.val.flash').forEach(td => td.classList.remove('flash')));
+}
+
+async function saveLabels() {
+  const d = cur(); if (!d) return;
+  const L = state.labels[d.id] || {};
+  const payload = {};
+  for (const [i, f] of Object.entries(L)) if (f.key || f.label || f.unit) payload[i] = { key: f.key || '', label: f.label || '', unit: f.unit || '' };
+  const r = await api('save_labels', d.id, payload);
+  setStatus(r.ok ? `${r.saved} Bezeichnungen gespeichert.` : r.error, r.ok ? 'ok' : 'bad');
+}
+
+function exportCsv() {
+  const d = cur(); const h = state.history[d?.id];
+  if (!h?.length) return setStatus('Noch keine Datensätze für CSV.', 'warn');
+  const L = state.labels[d.id] || {};
+  const n = Math.max(...h.map(x => x.v.length));
+  const head = ['Zeit', ...Array.from({ length: n }, (_, i) => (L[i]?.key || L[i]?.label || 'Wert' + i))];
+  const lines = [head.join(';'), ...h.map(x => [x.t, ...x.v.map(v => String(v).replace('.', ','))].join(';'))];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv' }));
+  a.download = `hargassner_${d.id}_${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+  a.click();
+}
+
+function startLive() {
+  stopLive(false);
+  read();
+  state.timer = setInterval(read, Number($('interval').value) * 1000);
+}
+function stopLive(uncheck = true) {
+  if (state.timer) clearInterval(state.timer);
+  state.timer = null;
+  if (uncheck) $('live').checked = false;
+}
+
+$('btnRead').onclick = read;
+$('btnProbe').onclick = probe;
+$('btnSave').onclick = saveLabels;
+$('btnCsv').onclick = exportCsv;
+$('live').onchange = (e) => e.target.checked ? (cur() ? startLive() : (e.target.checked = false)) : stopLive();
+$('interval').onchange = () => { if ($('live').checked) startLive(); };
+$('onlyChanged').onchange = () => renderTable(state.stats[state.cur]?.last || null);
+
+(async () => {
+  const r = await api('devices');
+  if (!r.ok) { $('devices').innerHTML = `<div class="empty">${r.error}</div>`; return; }
+  state.devices = r.devices;
+  renderDevices();
+  if (state.devices.length) select(state.devices[0].id);
+})();
+</script>
+</body>
+</html>

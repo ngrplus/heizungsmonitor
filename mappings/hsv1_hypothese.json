@@ -1,0 +1,206 @@
+{
+  "name": "Rennergy Mini.2 20 (Pellet, SW V14.0REN.p2) – teilweise bestätigt",
+  "note": "Bestätigt per Display 21.10.26: Puffer 11/12/13, Füllgrad 14, O2 1, Kessel 3. Alles mit ? weiter prüfen.",
+  "fields": {
+    "0": {
+      "key": "ZK",
+      "label": "Zustand Kessel (Code; 1 = Aus?)",
+      "unit": ""
+    },
+    "1": {
+      "key": "O2",
+      "label": "O2 ist (21 % = Luft, kein Feuer) ✓",
+      "unit": "%"
+    },
+    "2": {
+      "key": "O2s",
+      "label": "O2 soll",
+      "unit": "%"
+    },
+    "3": {
+      "key": "TK",
+      "label": "Kesseltemperatur ist ✓",
+      "unit": "°C"
+    },
+    "4": {
+      "key": "",
+      "label": "? (Kessel soll / Leistung?)",
+      "unit": ""
+    },
+    "5": {
+      "key": "TRG",
+      "label": "Rauchgastemperatur?",
+      "unit": "°C"
+    },
+    "6": {
+      "key": "",
+      "label": "? (36)",
+      "unit": ""
+    },
+    "7": {
+      "key": "TAUS",
+      "label": "Außentemperatur?",
+      "unit": "°C"
+    },
+    "8": {
+      "key": "",
+      "label": "? (war als Puffer vermutet – falsch)",
+      "unit": ""
+    },
+    "9": {
+      "key": "",
+      "label": "? (war als Puffer vermutet – falsch)",
+      "unit": ""
+    },
+    "10": {
+      "key": "",
+      "label": "? (war als Puffer vermutet – falsch)",
+      "unit": ""
+    },
+    "11": {
+      "key": "TPO",
+      "label": "Puffer oben ✓",
+      "unit": "°C"
+    },
+    "12": {
+      "key": "TPM",
+      "label": "Puffer mitte ✓",
+      "unit": "°C"
+    },
+    "13": {
+      "key": "TPU",
+      "label": "Puffer unten ✓",
+      "unit": "°C"
+    },
+    "14": {
+      "key": "PFD",
+      "label": "Pufferfüllgrad ✓",
+      "unit": "%"
+    },
+    "60": {
+      "key": "HK1_VL",
+      "label": "Heizkreis 1 Vorlauf ist (−20 = kein Fühler)",
+      "unit": "°C"
+    },
+    "61": {
+      "key": "HK1_VLs",
+      "label": "Heizkreis 1 Vorlauf soll",
+      "unit": "°C"
+    },
+    "62": {
+      "key": "HK1_RTs",
+      "label": "Heizkreis 1 Raum soll?",
+      "unit": "°C"
+    },
+    "63": {
+      "key": "HK1_RT",
+      "label": "Heizkreis 1 Raum ist?",
+      "unit": "°C"
+    },
+    "64": {
+      "key": "HK1_Z",
+      "label": "Heizkreis 1 Zustand",
+      "unit": ""
+    },
+    "65": {
+      "key": "HK1_F",
+      "label": "Heizkreis 1 Freigabe?",
+      "unit": ""
+    },
+    "66": {
+      "key": "HK2_VL",
+      "label": "Heizkreis 2 Vorlauf ist",
+      "unit": "°C"
+    },
+    "67": {
+      "key": "HK2_VLs",
+      "label": "Heizkreis 2 Vorlauf soll",
+      "unit": "°C"
+    },
+    "68": {
+      "key": "HK2_RTs",
+      "label": "Heizkreis 2 Raum soll?",
+      "unit": "°C"
+    },
+    "69": {
+      "key": "HK2_RT",
+      "label": "Heizkreis 2 Raum ist?",
+      "unit": "°C"
+    },
+    "70": {
+      "key": "HK2_Z",
+      "label": "Heizkreis 2 Zustand",
+      "unit": ""
+    },
+    "71": {
+      "key": "HK2_F",
+      "label": "Heizkreis 2 Freigabe?",
+      "unit": ""
+    },
+    "72": {
+      "key": "HK3_VL",
+      "label": "Heizkreis 3 Vorlauf ist",
+      "unit": "°C"
+    },
+    "73": {
+      "key": "HK3_VLs",
+      "label": "Heizkreis 3 Vorlauf soll",
+      "unit": "°C"
+    },
+    "74": {
+      "key": "HK3_RTs",
+      "label": "Heizkreis 3 Raum soll?",
+      "unit": "°C"
+    },
+    "75": {
+      "key": "HK3_RT",
+      "label": "Heizkreis 3 Raum ist?",
+      "unit": "°C"
+    },
+    "76": {
+      "key": "HK3_Z",
+      "label": "Heizkreis 3 Zustand",
+      "unit": ""
+    },
+    "77": {
+      "key": "HK3_F",
+      "label": "Heizkreis 3 Freigabe?",
+      "unit": ""
+    },
+    "78": {
+      "key": "HK4_VL",
+      "label": "Heizkreis 4 Vorlauf ist",
+      "unit": "°C"
+    },
+    "79": {
+      "key": "HK4_VLs",
+      "label": "Heizkreis 4 Vorlauf soll",
+      "unit": "°C"
+    },
+    "80": {
+      "key": "HK4_RTs",
+      "label": "Heizkreis 4 Raum soll?",
+      "unit": "°C"
+    },
+    "81": {
+      "key": "HK4_RT",
+      "label": "Heizkreis 4 Raum ist?",
+      "unit": "°C"
+    },
+    "82": {
+      "key": "HK4_Z",
+      "label": "Heizkreis 4 Zustand",
+      "unit": ""
+    },
+    "83": {
+      "key": "HK4_F",
+      "label": "Heizkreis 4 Freigabe?",
+      "unit": ""
+    },
+    "122": {
+      "key": "BSZ",
+      "label": "Betriebsstunden Zündung? (Display 258.9 h)",
+      "unit": "h"
+    }
+  }
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hargassner Cloud</title>
+<style>
+  :root { --bg: #f4f2ee; --panel: #fff; --ink: #1d1f21; --muted: #6b6f74; --line: #e2ded6; --accent: #c4531c;
+          --ok: #2f7d4f; --bad: #b3261e; --flash: #ffe9a8; --mono: ui-monospace, "Cascadia Mono", Consolas, monospace; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #17181a; --panel: #212326; --ink: #e8e6e3; --muted: #9a9ea3; --line: #34373b; --accent: #e0703a;
+            --ok: #5cbf85; --bad: #ef6b62; --flash: #5a4a14; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  header { padding: 18px 24px 8px; display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 20px; } header h1 span { color: var(--accent); }
+  header a { color: var(--muted); font-size: 13px; }
+  main { padding: 8px 24px 32px; max-width: 1200px; display: grid; gap: 14px; }
+  @media (max-width: 700px) { main, header { padding-left: 12px; padding-right: 12px; } }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button { font: inherit; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.sel { border-color: var(--accent); color: var(--accent); }
+  input[type=search] { font: inherit; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); min-width: 220px; }
+  label { color: var(--muted); font-size: 14px; display: inline-flex; gap: 6px; align-items: center; }
+  .status { font-size: 14px; color: var(--muted); }
+  .status.ok { color: var(--ok); } .status.bad { color: var(--bad); }
+  .widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+  .w h3 { margin: 0 0 6px; font-size: 14px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td { border-top: 1px solid var(--line); padding: 3px 4px; vertical-align: top; }
+  td.k { font: 12px var(--mono); color: var(--muted); word-break: break-all; width: 55%; }
+  td.v { font: 12px var(--mono); word-break: break-all; transition: background 1.5s; }
+  td.v.flash { background: var(--flash); transition: none; }
+  .muted { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Hargassner <span>Cloud</span></h1>
+  <a href="monitor.html">→ Monitor</a> <a href="index.html">→ Telnet-Test</a>
+</header>
+<main>
+  <section class="panel">
+    <div class="bar">
+      <button class="primary" id="btnInst">Anlagen laden</button>
+      <span id="inst" class="bar"></span>
+    </div>
+    <p class="status" id="status">Zugangsdaten stehen in <code>cloud_config.php</code>. Dann „Anlagen laden“ klicken.</p>
+  </section>
+
+  <section class="panel" id="tools" hidden>
+    <div class="bar">
+      <button id="btnReload">Neu laden</button>
+      <label><input type="checkbox" id="auto"> alle 60 s</label>
+      <input type="search" id="filter" placeholder="Filter, z. B. temp, puffer, state …">
+      <label><input type="checkbox" id="onlyNum"> nur Zahlen</label>
+    </div>
+    <p class="muted">Gelb blinkende Werte haben sich seit dem letzten Laden geändert. Jede Abfrage wird als
+      <code>data/cloud_widgets_…json</code> gespeichert.</p>
+  </section>
+
+  <div class="widgets" id="widgets"></div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let cur = null, prev = {}, last = null, timer = null;
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function api(q) {
+  const r = await fetch('api.php?' + q); const t = await r.text();
+  try { return JSON.parse(t); } catch { return { ok: false, error: 'Keine JSON-Antwort: ' + t.slice(0, 200) }; }
+}
+function status(m, c = '') { $('status').textContent = m; $('status').className = 'status ' + c; }
+
+$('btnInst').onclick = async () => {
+  status('Melde mich bei der Hargassner-Cloud an …');
+  const r = await api('action=cloud_installations');
+  if (!r.ok) return status(r.error, 'bad');
+  $('inst').innerHTML = '';
+  for (const i of r.installations) {
+    const b = document.createElement('button');
+    b.textContent = `${i.name || i.slug} (${i.id})`;
+    b.onclick = () => { cur = i.id; prev = {}; [...$('inst').children].forEach(x => x.classList.toggle('sel', x === b)); load(); };
+    $('inst').appendChild(b);
+  }
+  status(`${r.installations.length} Anlage(n) gefunden – eine auswählen.`, 'ok');
+};
+
+async function load() {
+  if (!cur) return;
+  status('Lade Werte …');
+  const r = await api('action=cloud_widgets&inst=' + encodeURIComponent(cur));
+  if (!r.ok) return status(r.error, 'bad');
+  last = r; $('tools').hidden = false;
+  render();
+  status(`${r.time} · ${r.widgets.length} Widgets geladen`, 'ok');
+  const flat = {}; r.widgets.forEach((w, i) => Object.entries(w.values).forEach(([k, v]) => flat[i + ':' + k] = v));
+  setTimeout(() => { prev = flat; }, 0);
+}
+
+function render() {
+  if (!last) return;
+  const f = $('filter').value.toLowerCase(), num = $('onlyNum').checked;
+  $('widgets').innerHTML = last.widgets.map((w, i) => {
+    const rows = Object.entries(w.values).filter(([k, v]) =>
+      (!f || (k + ' ' + v).toLowerCase().includes(f) || w.name.toLowerCase().includes(f)) && (!num || typeof v === 'number'));
+    if (!rows.length) return '';
+    return `<div class="panel w"><h3>${esc(w.name)}</h3><table>${rows.map(([k, v]) => {
+      const changed = (i + ':' + k) in prev && prev[i + ':' + k] !== v;
+      return `<tr><td class="k">${esc(k)}</td><td class="v${changed ? ' flash' : ''}">${esc(v === null ? 'null' : v)}</td></tr>`;
+    }).join('')}</table></div>`;
+  }).join('');
+  requestAnimationFrame(() => document.querySelectorAll('td.v.flash').forEach(td => td.classList.remove('flash')));
+}
+
+$('btnReload').onclick = load;
+$('filter').oninput = render;
+$('onlyNum').onchange = render;
+$('auto').onchange = (e) => { clearInterval(timer); if (e.target.checked) timer = setInterval(load, 60000); };
+</script>
+</body>
+</html>

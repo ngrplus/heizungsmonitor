@@ -1,0 +1,832 @@
+{
+ "name": "Rennergy Mini.2 20 – Kanalliste V14.0HAR.p, mit Hargassner-Cloud abgeglichen",
+ "note": "Pos. 0–36 aus Kanalliste channel-nanoPK-v14.0HAR.p (github.com/Jahislove/Hargassner); ab Pos. 41 +2, ab Pos. 60 +3 versetzt. ✓ = am Display, von Hand oder per Hargassner-Cloud (22.10.26) bestätigt. Heizkreis 1 = ALTBAU, 2 = NEUBAU. Statusbits aus github.com/TheRealKillaruna/nano_pk.",
+ "fields": {
+  "0": {
+   "key": "ZK",
+   "label": "Kesselzustand",
+   "unit": "",
+   "enum": {
+    "0": "Initialisierung",
+    "1": "Aus",
+    "2": "Startvorbereitung",
+    "3": "Kesselstart",
+    "4": "Zündüberwachung",
+    "5": "Zündung",
+    "6": "Übergang Leistungsbrand",
+    "7": "Leistungsbrand",
+    "8": "Bereitschaft",
+    "9": "Halt für Entaschung",
+    "10": "Entaschung",
+    "11": "Abkühlen",
+    "12": "Reinigung",
+    "15": "Handbetrieb",
+    "17": "Verbrennungsassistent"
+   }
+  },
+  "1": {
+   "key": "O2",
+   "label": "O2 im Rauchgas ist ✓",
+   "unit": "%"
+  },
+  "2": {
+   "key": "O2soll",
+   "label": "O2 soll",
+   "unit": "%"
+  },
+  "3": {
+   "key": "TK",
+   "label": "Kesseltemperatur ist ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "4": {
+   "key": "TKsoll",
+   "label": "Kesseltemperatur soll",
+   "unit": "°C"
+  },
+  "5": {
+   "key": "TRL",
+   "label": "Rücklauftemperatur",
+   "unit": "°C"
+  },
+  "6": {
+   "key": "TRLsoll",
+   "label": "Rücklauf soll",
+   "unit": "°C"
+  },
+  "7": {
+   "key": "Spreizung",
+   "label": "Spreizung Vor-/Rücklauf",
+   "unit": "°C"
+  },
+  "8": {
+   "key": "TRG",
+   "label": "Rauchgastemperatur ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "9": {
+   "key": "SZist",
+   "label": "Saugzug ist",
+   "unit": "%"
+  },
+  "10": {
+   "key": "SZsoll",
+   "label": "Saugzug soll",
+   "unit": "%"
+  },
+  "11": {
+   "key": "TPo",
+   "label": "Puffer oben ✓",
+   "unit": "°C"
+  },
+  "12": {
+   "key": "TPm",
+   "label": "Puffer mitte ✓",
+   "unit": "°C"
+  },
+  "13": {
+   "key": "TPu",
+   "label": "Puffer unten ✓",
+   "unit": "°C"
+  },
+  "14": {
+   "key": "PFD",
+   "label": "Pufferfüllgrad ✓ (Cloud)",
+   "unit": "%"
+  },
+  "15": {
+   "key": "Puffer_soll_oben",
+   "label": "Puffer soll oben",
+   "unit": "°C"
+  },
+  "16": {
+   "key": "Puffer_soll_unten",
+   "label": "Puffer soll unten",
+   "unit": "°C"
+  },
+  "17": {
+   "key": "PuffZustand",
+   "label": "Pufferzustand (Code)",
+   "unit": ""
+  },
+  "18": {
+   "key": "Max_Anf_Kessel",
+   "label": "Max Anf Kessel",
+   "unit": ""
+  },
+  "19": {
+   "key": "TFW",
+   "label": "Fühler Fernwärme/Zubringer",
+   "unit": "°C"
+  },
+  "20": {
+   "key": "Leistung",
+   "label": "Kesselleistung",
+   "unit": "%"
+  },
+  "21": {
+   "key": "ESsoll",
+   "label": "Einschub soll",
+   "unit": "%"
+  },
+  "22": {
+   "key": "min.Leist.TRG",
+   "label": "min.Leist.TRG",
+   "unit": "%"
+  },
+  "23": {
+   "key": "max.Leist.TRG",
+   "label": "max.Leist.TRG",
+   "unit": "%"
+  },
+  "24": {
+   "key": "max.Leist.Fuell",
+   "label": "max.Leist.Fuell",
+   "unit": "%"
+  },
+  "25": {
+   "key": "max.Leist.TPO",
+   "label": "max.Leist.TPO",
+   "unit": "%"
+  },
+  "26": {
+   "key": "ESRegler",
+   "label": "ESRegler",
+   "unit": "%"
+  },
+  "27": {
+   "key": "Regler_K",
+   "label": "Regler K",
+   "unit": ""
+  },
+  "28": {
+   "key": "KeBrstScale",
+   "label": "KeBrstScale",
+   "unit": "%"
+  },
+  "29": {
+   "key": "Programm",
+   "label": "Programm (Code)",
+   "unit": ""
+  },
+  "30": {
+   "key": "Störungs_Nr",
+   "label": "Störungsnummer (0 = keine)",
+   "unit": ""
+  },
+  "31": {
+   "key": "Max_Anf_ZenPuf",
+   "label": "Max Anf ZenPuf",
+   "unit": "°C"
+  },
+  "32": {
+   "key": "I_Es",
+   "label": "I Es",
+   "unit": "mA"
+  },
+  "33": {
+   "key": "I_Ra",
+   "label": "I Ra",
+   "unit": "mA"
+  },
+  "34": {
+   "key": "I_Aa",
+   "label": "I Aa",
+   "unit": "mA"
+  },
+  "35": {
+   "key": "I_Sr",
+   "label": "I Sr",
+   "unit": "mA"
+  },
+  "36": {
+   "key": "I_Rein",
+   "label": "I Rein",
+   "unit": "mA"
+  },
+  "37": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: LZ ES seit Füll. / I Sr)",
+   "unit": ""
+  },
+  "38": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: LZ ES seit Ent. / I Rein)",
+   "unit": ""
+  },
+  "39": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: Anzahl Entasch. / LZ ES seit Füll.)",
+   "unit": ""
+  },
+  "40": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: Anzahl SR Beweg. / LZ ES seit Ent.)",
+   "unit": ""
+  },
+  "41": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: Lagerstand / Anzahl Entasch.)",
+   "unit": ""
+  },
+  "42": {
+   "key": "",
+   "label": "? Bereich vor dem Versatz um 2 (Liste: Verbrauchszähler / Anzahl SR Beweg.)",
+   "unit": ""
+  },
+  "43": {
+   "key": "Lagerstand",
+   "label": "Pellet-Lagerstand ✓ (Cloud fuel_stock)",
+   "unit": "kg"
+  },
+  "44": {
+   "key": "Verbrauchszähler",
+   "label": "Pelletverbrauch gesamt ✓ (von Hand bestätigt) (Liste Pos. 42, +2)",
+   "unit": "kg"
+  },
+  "45": {
+   "key": "Heiz_P_Lambda",
+   "label": "Heiz P Lambda (Liste Pos. 43, +2)",
+   "unit": "W"
+  },
+  "46": {
+   "key": "Heiz_U_Lambda",
+   "label": "Heiz U Lambda (Liste Pos. 44, +2)",
+   "unit": "V"
+  },
+  "47": {
+   "key": "Heiz_I_Lambda",
+   "label": "Heiz I Lambda (Liste Pos. 45, +2)",
+   "unit": "mA"
+  },
+  "48": {
+   "key": "U_Lambda",
+   "label": "U_Lambda (Liste Pos. 46, +2)",
+   "unit": "mV"
+  },
+  "49": {
+   "key": "U_Netzteil",
+   "label": "Netzteilspannung (24089 mV = 24 V) (Liste Pos. 47, +2)",
+   "unit": "mV"
+  },
+  "50": {
+   "key": "T_Spülung",
+   "label": "T Spülung (Liste Pos. 48, +2)",
+   "unit": "°C"
+  },
+  "51": {
+   "key": "BRT",
+   "label": "BRT (Liste Pos. 49, +2)",
+   "unit": "°C"
+  },
+  "52": {
+   "key": "Tplat",
+   "label": "Tplat (Liste Pos. 50, +2)",
+   "unit": "°C"
+  },
+  "53": {
+   "key": "TVG",
+   "label": "TVG (Liste Pos. 51, +2)",
+   "unit": "°C"
+  },
+  "54": {
+   "key": "TVG2",
+   "label": "TVG2 (Liste Pos. 52, +2)",
+   "unit": "°C"
+  },
+  "55": {
+   "key": "AIN17",
+   "label": "AIN17 (Liste Pos. 53, +2)",
+   "unit": "V"
+  },
+  "56": {
+   "key": "Taus",
+   "label": "Außentemperatur ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "57": {
+   "key": "TA_Gem",
+   "label": "Außentemperatur gemittelt ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "58": {
+   "key": "ExtHK_Solltmp.",
+   "label": "ExtHK Solltmp. (Liste Pos. 56, +2)",
+   "unit": "°C"
+  },
+  "59": {
+   "key": "",
+   "label": "? zusätzlicher Kanal der Rennergy-Firmware (danach +3)",
+   "unit": ""
+  },
+  "60": {
+   "key": "HKA_VL",
+   "label": "HKA: Vorlauf ist (kein Fühler: −20)",
+   "unit": "°C"
+  },
+  "61": {
+   "key": "HKA_VLs",
+   "label": "HKA: Vorlauf soll (0 = aus)",
+   "unit": "°C"
+  },
+  "62": {
+   "key": "HKA_RT",
+   "label": "HKA: Raum ist (kein Raumfühler → 20)",
+   "unit": "°C"
+  },
+  "63": {
+   "key": "HKA_RTs",
+   "label": "HKA: Raum soll",
+   "unit": "°C"
+  },
+  "64": {
+   "key": "HKA_Z",
+   "label": "HKA: Zustand (1 = heizen, 4 = Tages-/Nachtabschaltung)",
+   "unit": ""
+  },
+  "65": {
+   "key": "HKA_FR",
+   "label": "HKA: Fernbedienung Zustand",
+   "unit": ""
+  },
+  "66": {
+   "key": "HK1_VL",
+   "label": "HK1 ALTBAU: Vorlauf ist ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "67": {
+   "key": "HK1_VLs",
+   "label": "HK1 ALTBAU: Vorlauf soll (0 = aus)",
+   "unit": "°C"
+  },
+  "68": {
+   "key": "HK1_RT",
+   "label": "HK1 ALTBAU: Raum ist (kein Raumfühler → 20)",
+   "unit": "°C"
+  },
+  "69": {
+   "key": "HK1_RTs",
+   "label": "HK1 ALTBAU: Raum soll ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "70": {
+   "key": "HK1_Z",
+   "label": "HK1 ALTBAU: Zustand (1 = heizen, 4 = Tages-/Nachtabschaltung)",
+   "unit": ""
+  },
+  "71": {
+   "key": "HK1_FR",
+   "label": "HK1 ALTBAU: Fernbedienung Zustand",
+   "unit": ""
+  },
+  "72": {
+   "key": "HK2_VL",
+   "label": "HK2 NEUBAU: Vorlauf ist ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "73": {
+   "key": "HK2_VLs",
+   "label": "HK2 NEUBAU: Vorlauf soll (0 = aus)",
+   "unit": "°C"
+  },
+  "74": {
+   "key": "HK2_RT",
+   "label": "HK2 NEUBAU: Raum ist (kein Raumfühler → 20)",
+   "unit": "°C"
+  },
+  "75": {
+   "key": "HK2_RTs",
+   "label": "HK2 NEUBAU: Raum soll ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "76": {
+   "key": "HK2_Z",
+   "label": "HK2 NEUBAU: Zustand (1 = heizen, 4 = Tages-/Nachtabschaltung)",
+   "unit": ""
+  },
+  "77": {
+   "key": "HK2_FR",
+   "label": "HK2 NEUBAU: Fernbedienung Zustand",
+   "unit": ""
+  },
+  "78": {
+   "key": "HKB_VL",
+   "label": "HKB: Vorlauf ist (kein Fühler: −20)",
+   "unit": "°C"
+  },
+  "79": {
+   "key": "HKB_VLs",
+   "label": "HKB: Vorlauf soll (0 = aus)",
+   "unit": "°C"
+  },
+  "80": {
+   "key": "HKB_RT",
+   "label": "HKB: Raum ist (kein Raumfühler → 20)",
+   "unit": "°C"
+  },
+  "81": {
+   "key": "HKB_RTs",
+   "label": "HKB: Raum soll",
+   "unit": "°C"
+  },
+  "82": {
+   "key": "HKB_Z",
+   "label": "HKB: Zustand (1 = heizen, 4 = Tages-/Nachtabschaltung)",
+   "unit": ""
+  },
+  "83": {
+   "key": "HKB_FR",
+   "label": "HKB: Fernbedienung Zustand",
+   "unit": ""
+  },
+  "84": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "85": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "86": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "87": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "88": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "89": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "90": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "91": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "92": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "93": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "94": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "95": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "96": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "97": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "98": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "99": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "100": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "101": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "102": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "103": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "104": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "105": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "106": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "107": {
+   "key": "FWS_?",
+   "label": "Frischwasserstation: ? (≈ Puffer oben)",
+   "unit": "°C"
+  },
+  "108": {
+   "key": "FWS_VL",
+   "label": "Frischwasserstation: Vorlauf ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "109": {
+   "key": "WW_soll",
+   "label": "Warmwasser soll ✓ (Cloud)",
+   "unit": "°C"
+  },
+  "110": {
+   "key": "WW_ist?",
+   "label": "Warmwasser ist? (Frischwasserstation)",
+   "unit": "°C"
+  },
+  "111": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "112": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "113": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "114": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "115": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "116": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "117": {
+   "key": "WW_Pumpe?",
+   "label": "Frischwasserstation: Pumpe aktiv? (0/1)",
+   "unit": ""
+  },
+  "118": {
+   "key": "WW_Tag",
+   "label": "Warmwasser heute ✓ (Cloud flow_count_daily)",
+   "unit": "l"
+  },
+  "119": {
+   "key": "WW_Ges",
+   "label": "Warmwasser gesamt ✓ (Cloud flow_count_total)",
+   "unit": "l"
+  },
+  "120": {
+   "key": "WW_Durchfl?",
+   "label": "Warmwasser Durchfluss? (beim Zapfen > 0)",
+   "unit": "l/min"
+  },
+  "121": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "122": {
+   "key": "BSZ?",
+   "label": "Betriebsstunden Zündung? (Display 258,9 h)",
+   "unit": "h"
+  },
+  "123": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "124": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "125": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "126": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "127": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "128": {
+   "key": "",
+   "label": "? (nicht in der Kanalliste V14.0HAR.p)",
+   "unit": ""
+  },
+  "129": {
+   "key": "DIG0",
+   "label": "Statuswort 0 – Bit 0 = Störung",
+   "unit": "",
+   "bits": {
+    "0": "Störung",
+    "1": "Stb",
+    "2": "Fuellstand",
+    "3": "RLP/PuffP",
+    "4": "RLm_auf",
+    "5": "RLm_zu",
+    "10": "WS freig.",
+    "11": "Akt. Code",
+    "14": "FW Freig.",
+    "15": "gFlP",
+    "16": "gFlM auf",
+    "17": "gFlM zu",
+    "18": "gFl2P",
+    "19": "gFl2M auf",
+    "20": "gFl2M zu"
+   }
+  },
+  "130": {
+   "key": "DIG1",
+   "label": "Statuswort 1 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "L Heiz.",
+    "1": "Z Heiz.",
+    "2": "Z Geb.",
+    "3": "AA Run",
+    "4": "AA Dir",
+    "5": "ES Run",
+    "6": "ES Dir",
+    "7": "AS Saug",
+    "8": "AS RA Run",
+    "9": "AS RA Dir",
+    "10": "Rein En",
+    "11": "Rein Run",
+    "12": "Es Rein Endl",
+    "13": "sAS Anf Füll"
+   }
+  },
+  "131": {
+   "key": "DIG2",
+   "label": "Statuswort 2 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "HKPA",
+    "1": "MAA",
+    "2": "MAZ",
+    "3": "HKP1",
+    "4": "M1A",
+    "5": "M1Z",
+    "6": "HKP2",
+    "7": "M2A",
+    "8": "M2Z",
+    "9": "HKP3",
+    "10": "M3A",
+    "11": "M3Z",
+    "12": "HKP4",
+    "13": "M4A",
+    "14": "M4Z",
+    "15": "HKP5",
+    "16": "M5A",
+    "17": "M5Z",
+    "18": "HKP6",
+    "19": "M6A",
+    "20": "M6Z",
+    "21": "HKPB",
+    "22": "MBA",
+    "23": "MBZ"
+   }
+  },
+  "132": {
+   "key": "DIG3",
+   "label": "Statuswort 3 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "BPA",
+    "1": "BP1",
+    "2": "BP2",
+    "3": "BP3",
+    "4": "BPB",
+    "5": "BZPA",
+    "6": "BZP1",
+    "7": "BZP2",
+    "8": "BZP3",
+    "9": "BZPB"
+   }
+  },
+  "133": {
+   "key": "DIG4",
+   "label": "Statuswort 4 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "Aschebox",
+    "1": "Netztrafo",
+    "2": "Netzrelais",
+    "4": "Lagerraum",
+    "6": "FLP",
+    "8": "ATW",
+    "9": "Entasch gesp.",
+    "13": "HKV",
+    "14": "Spülung Aktiv"
+   }
+  },
+  "134": {
+   "key": "DIG5",
+   "label": "Statuswort 5 (Bits)",
+   "unit": "",
+   "bits": {}
+  },
+  "135": {
+   "key": "DIG6",
+   "label": "Statuswort 6 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "EHK Anf",
+    "2": "EHK Anf2",
+    "3": "EHK Anf3",
+    "4": "EHKP",
+    "6": "EHKP2",
+    "7": "EHKP3",
+    "8": "KASK1 MinLeist",
+    "9": "KASK2 MinLeist",
+    "10": "KASK3 MinLeist",
+    "11": "KASK4 MinLeist",
+    "12": "KASK1 MaxLeist",
+    "13": "KASK2 MaxLeist",
+    "14": "KASK3 MaxLeist",
+    "15": "KASK4 MaxLeist",
+    "16": "KASK1 Run",
+    "17": "KASK2 Run",
+    "18": "KASK3 Run",
+    "19": "KASK4 Run",
+    "20": "KASK1 OK",
+    "21": "KASK2 OK",
+    "22": "KASK3 OK",
+    "23": "KASK4 OK",
+    "24": "Kask KWK Out",
+    "25": "Kask FW Out",
+    "26": "KASK KWK OK",
+    "27": "KASK FW OK"
+   }
+  },
+  "136": {
+   "key": "DIG7",
+   "label": "Statuswort 7 (Bits)",
+   "unit": "",
+   "bits": {
+    "0": "DReg P2",
+    "1": "DReg P3",
+    "2": "DReg Mi auf",
+    "3": "DReg Mi zu",
+    "5": "DReg2 P2",
+    "6": "DReg2 Mi auf",
+    "7": "DReg2 Mi zu",
+    "9": "DReg3 P2",
+    "10": "DReg3 P3",
+    "11": "DReg3 Mi auf",
+    "12": "DReg3 Mi zu"
+   }
+  }
+ }
+}
